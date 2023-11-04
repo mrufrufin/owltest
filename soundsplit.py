@@ -33,5 +33,5 @@ for folder in wantfolder:
             #print(curcmd)
         
 
-    print(cur_contents)
+    #print(cur_contents)
 
