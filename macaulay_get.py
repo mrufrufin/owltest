@@ -28,11 +28,11 @@ def fix_name(cur_name):
     return ret_name3
 
 def get_mp3(cnum, cur_outf):
+    status_str = f"Downloading {cnum} into {cur_outf}"
+    print(status_str)
     want_url = f"https://cdn.download.ams.birds.cornell.edu/api/v1/asset/{cnum}/audio"
     resp = requests.get(want_url)
     if resp.ok == True:
-        status_str = f"Downloading {cnum} into {cur_outf}"
-        print(status_str)
         make_folder(cur_outf)
         save_name = f"ML{cnum}.mp3"
         save_path = os.path.join(cur_outf, save_name)
