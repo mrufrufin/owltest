@@ -6,13 +6,14 @@ import torchaudio.transforms as TAT
 import os
 import sys
 
-def audioload_helper(want_file:str, fpath:str = "data", want_sr:int = None, want_bits:int = None, to_mono:bool = True) -> any:
+def audioload_helper(want_file:str, fpath:str = "data", want_sr:int = None, want_bits:int = None, max_samp: float = np.inf, to_mono:bool = True) -> any:
     cur_fp = None
     if len(fpath) > 0:
         cur_fp = os.path.join(fpath, want_file)
     else:
         cur_fp = want_file
-    cur_wf, cur_sr = TA.load(cur_fp)
+    read_frames = int(max_samp) if np.isfinite(max_samp) == True else -1
+    cur_wf, cur_sr = TA.load(cur_fp, num_frames = read_frames)
     cur_nc, cur_nf = cur_wf.shape
     ret_wf = None
     ret_sr = None
@@ -52,6 +53,9 @@ def audioload_helper(want_file:str, fpath:str = "data", want_sr:int = None, want
     else:
         ret_wf = cur_wf2
         ret_sr = cur_sr
+
+    if ret_wf.shape[1] < read_frames:
+        ret_wf = torch.nn.functional.pad(ret_wf, (0, read_frames - ret_wf.shape[1]))
 
     return ret_wf, ret_sr
 

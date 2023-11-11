@@ -20,7 +20,7 @@ class BirdSet(Dataset):
             cur_labels = [folder] * cur_len
             sndpaths += cur_snds
             sndlabels += cur_labels
-        print(sndpaths)
+        #print(sndpaths)
         s3 = SMS.StratifiedShuffleSplit(n_splits = 1, test_size = test_size, random_state = random_state)
         spl = s3.split(sndpaths, sndlabels)
         cur_ds = list(spl)[0]
@@ -53,6 +53,7 @@ class BirdSet(Dataset):
         mapidx = self.cur_idx[idx]
         curpath = self.fullpaths[mapidx]
         curlabel = self.fulllabels[mapidx]
-        retsnd = SL.sndloader(curpath, want_sr=None, want_bits=None, to_mono=True)
+        retsnd = SL.sndloader(curpath, want_sr=None, want_bits=None, max_samp = self.max_samp, to_mono=True)
+        #print(retsnd, curlabel)
         return retsnd, curlabel
 

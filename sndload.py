@@ -6,8 +6,9 @@ import torchaudio.transforms as TAT
 import os
 import sys
 
-def sndloader(want_file:str, want_sr:int = None, want_bits:int = None, to_mono:bool = True) -> any:
-    cur_wf, cur_sr = TA.load(want_file)
+def sndloader(want_file:str, want_sr:int = None, want_bits:int = None, max_samp = np.inf, to_mono:bool = True) -> any:
+    read_frames = int(max_samp) if np.isfinite(max_samp) == True else -1
+    cur_wf, cur_sr = TA.load(want_file, num_frames = read_frames)
     cur_nc, cur_nf = cur_wf.shape
     ret_wf = None
     ret_sr = None
@@ -18,7 +19,7 @@ def sndloader(want_file:str, want_sr:int = None, want_bits:int = None, to_mono:b
         cur_wf2 = (cur_wf * cur_mult).sum(dim=0).unsqueeze(0)
     else:
         cur_wf2 = cur_wf
-    if want_sr != cur_sr:
+    if want_sr != cur_sr and want_sr != None:
         ret_wf = resamp_helper(cur_wf2, cur_sr, want_sr, want_bits=want_bits)
         ret_sr = want_sr
     elif want_bits != None:
@@ -48,6 +49,27 @@ def sndloader(want_file:str, want_sr:int = None, want_bits:int = None, to_mono:b
         ret_wf = cur_wf2
         ret_sr = cur_sr
 
+    if ret_wf.shape[1] < read_frames:
+        ret_wf = torch.nn.functional.pad(ret_wf, (0, read_frames - ret_wf.shape[1]))
+
     return ret_wf
+
+def resamp_helper(cur_wf:any, cur_sr:int, want_sr:int, want_bits:int = None) -> any:
+    cur_dtype = cur_wf.dtype
+    resamp_f = TAT.Resample(cur_sr, want_sr)
+    want_dtype = None
+    resamped = None
+    if want_bits != None:
+        if want_bits == 64:
+            want_dtype = torch.float64
+        elif want_bits == 32:
+            want_dtype = torch.float32
+        elif want_bits == 16:
+            want_dtype = torch.float16
+    if want_dtype == None:
+        resamped = resamp_f(cur_wf)
+    else:
+        resamped = resamp_f(cur_wf).to(want_dtype)
+    return resamped
 
 
