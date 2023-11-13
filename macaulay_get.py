@@ -7,9 +7,9 @@ import re
 #https://macaulaylibrary.org/asset/NUMBER is the webpage with the sound player for a bird
 #https://cdn.download.ams.birds.cornell.edu/api/v1/asset/NUMBER/audio is the mp3 file corresponding to it
 
-start_row = 904
+start_row = 0
 cur_lim = float('inf')
-cur_sleep = 20
+cur_sleep = 15
 num = 435066121
 curdir = os.path.split(__file__)[0]
 datafolder = os.path.join(curdir, 'macaulay', 'csv')
